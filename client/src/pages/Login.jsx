@@ -1,7 +1,13 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import Input from "../components/forms/Input";
+import { clearAuthError, login } from "../features/auth/authSlice";
 
 function Login() {
+  const dispatch = useDispatch();
+  const { loading, error: authError } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,16 +22,30 @@ function Login() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    dispatch(clearAuthError());
 
     if (!formData.email || !formData.password) {
       setError("Email and password are required");
       return;
     }
 
-    console.log("Login Data:", formData);
+    const result = await dispatch(
+      login({
+        email: formData.email,
+        password: formData.password,
+      })
+    );
+
+    if (login.fulfilled.match(result)) {
+      alert("Login successful");
+      setFormData({
+        email: "",
+        password: "",
+      });
+    }
   };
 
   return (
@@ -51,9 +71,9 @@ function Login() {
       >
         <h3 className="mb-6 text-2xl font-bold text-slate-900">Login</h3>
 
-        {error && (
+        {(error || authError) && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
+            {error || authError}
           </p>
         )}
 
@@ -83,8 +103,11 @@ function Login() {
           </a>
         </div>
 
-        <button className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700">
-          Login
+        <button
+          disabled={loading}
+          className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </section>

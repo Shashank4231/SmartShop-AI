@@ -4,6 +4,7 @@ import {
   getCurrentUser,
   loginUser,
   logoutUser,
+  refreshAccessToken,
   registerUser,
 } from "../controllers/auth.controller.js";
 
@@ -21,6 +22,7 @@ const router = express.Router();
 router.post("/register", registerValidator, validate, registerUser);
 router.post("/login", loginValidator, validate, loginUser);
 router.post("/logout", logoutUser);
+router.post("/refresh-token", refreshAccessToken);
 router.get("/me", verifyJWT, getCurrentUser);
 
 export default router;

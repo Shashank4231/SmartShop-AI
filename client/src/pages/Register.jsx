@@ -1,7 +1,13 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import Input from "../components/forms/Input";
+import { clearAuthError, register } from "../features/auth/authSlice";
 
 function Register() {
+  const dispatch = useDispatch();
+  const { loading, error: authError } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,9 +24,10 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    dispatch(clearAuthError());
 
     if (!formData.name || !formData.email || !formData.password) {
       setError("All fields are required");
@@ -37,7 +44,24 @@ function Register() {
       return;
     }
 
-    console.log("Register Data:", formData);
+    const result = await dispatch(
+      register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      })
+    );
+
+    if (register.fulfilled.match(result)) {
+      alert("User registered successfully");
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    }
   };
 
   return (
@@ -65,9 +89,9 @@ function Register() {
           Create Account
         </h3>
 
-        {error && (
+        {(error || authError) && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
+            {error || authError}
           </p>
         )}
 
@@ -108,8 +132,11 @@ function Register() {
           />
         </div>
 
-        <button className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700">
-          Register
+        <button
+          disabled={loading}
+          className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+        >
+          {loading ? "Creating Account..." : "Register"}
         </button>
       </form>
     </section>
