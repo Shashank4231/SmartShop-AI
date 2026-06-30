@@ -4,6 +4,8 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import authRoutes from "./routes/auth.routes.js";
+import errorMiddleware from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -34,5 +36,9 @@ app.get("/", (req, res) => {
     message: "SmartShop AI API is running successfully",
   });
 });
+
+app.use("/api/v1/auth", authRoutes);
+
+app.use(errorMiddleware);
 
 export default app;
