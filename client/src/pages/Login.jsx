@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Input from "../components/forms/Input";
 import { clearAuthError, login } from "../features/auth/authSlice";
+import { fetchCart } from "../features/cart/cartSlice";
 
 function Login() {
   const dispatch = useDispatch();
@@ -40,6 +41,7 @@ function Login() {
     );
 
     if (login.fulfilled.match(result)) {
+      dispatch(fetchCart());
       alert("Login successful");
       setFormData({
         email: "",

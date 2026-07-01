@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { setAuthToken } from "../../services/api";
 import {
   getCurrentUser,
   loginUser,
@@ -116,6 +117,8 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
+
+        setAuthToken(action.payload.accessToken);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -132,6 +135,8 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
+
+        setAuthToken(action.payload.accessToken);
       })
       .addCase(loadCurrentUser.rejected, (state) => {
         state.loading = false;
@@ -148,6 +153,8 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
+
+        setAuthToken(null);
       })
       .addCase(logoutUserThunk.rejected, (state, action) => {
         state.loading = false;

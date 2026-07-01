@@ -6,6 +6,7 @@ import { logoutUserThunk } from "../features/auth/authSlice";
 function MainLayout() {
   const dispatch = useDispatch();
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { totalItems } = useSelector((state) => state.cart);
 
   const handleLogout = async () => {
     await dispatch(logoutUserThunk());
@@ -42,9 +43,14 @@ function MainLayout() {
 
                 <Link
                   to="/cart"
-                  className="text-sm font-medium hover:text-blue-600"
+                  className="relative text-sm font-medium hover:text-blue-600"
                 >
                   Cart
+                  {totalItems > 0 && (
+                    <span className="absolute -right-4 -top-3 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
+                      {totalItems}
+                    </span>
+                  )}
                 </Link>
               </>
             )}

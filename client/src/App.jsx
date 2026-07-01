@@ -3,14 +3,19 @@ import { useDispatch, useSelector } from "react-redux";
 
 import AppRoutes from "./routes/AppRoutes";
 import { loadCurrentUser } from "./features/auth/authSlice";
+import { fetchCart } from "./features/cart/cartSlice";
 
 function App() {
   const dispatch = useDispatch();
   const { initialized, loading } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    dispatch(loadCurrentUser());
-  }, [dispatch]);
+useEffect(() => {
+  dispatch(loadCurrentUser()).then((result) => {
+    if (loadCurrentUser.fulfilled.match(result)) {
+      dispatch(fetchCart());
+    }
+  });
+}, [dispatch]);
 
   if (!initialized && loading) {
     return (
