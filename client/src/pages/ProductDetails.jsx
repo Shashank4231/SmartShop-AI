@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import { addProductToCart } from "../features/cart/cartSlice";
 import { fetchProductBySlug } from "../features/product/productSlice";
+import {
+  addProductToWishlist,
+  removeProductFromWishlist,
+} from "../features/wishlist/wishlistSlice";
+
+import Loader from "../components/ui/Loader";
+import Button from "../components/ui/Button";
 
 function ProductDetails() {
   const { slug } = useParams();
@@ -15,7 +23,11 @@ function ProductDetails() {
 
   const { isAuthenticated } = useSelector((state) => state.auth);
 
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
+
   const [activeImage, setActiveImage] = useState("");
+
+  const isWishlisted = wishlistItems.some((item) => item._id === product?._id);
 
   useEffect(() => {
     dispatch(fetchProductBySlug(slug));
@@ -29,7 +41,7 @@ function ProductDetails() {
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
-      alert("Please login to add products to cart");
+      toast.error("Please login to add products to cart");
       return;
     }
 
@@ -41,12 +53,36 @@ function ProductDetails() {
     );
 
     if (addProductToCart.fulfilled.match(result)) {
-      alert("Product added to cart");
+      toast.success("Product added to cart");
+    } else {
+      toast.error(result.payload || "Failed to add product to cart");
+    }
+  };
+
+  const handleWishlist = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to use wishlist");
+      return;
+    }
+
+    const result = await dispatch(
+      isWishlisted
+        ? removeProductFromWishlist(product._id)
+        : addProductToWishlist(product._id)
+    );
+
+    if (
+      addProductToWishlist.fulfilled.match(result) ||
+      removeProductFromWishlist.fulfilled.match(result)
+    ) {
+      toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
+    } else {
+      toast.error(result.payload || "Wishlist action failed");
     }
   };
 
   if (loading) {
-    return <p className="mx-auto max-w-7xl px-4 py-16">Loading product...</p>;
+    return <Loader text="Loading product..." />;
   }
 
   if (error) {
@@ -120,16 +156,18 @@ function ProductDetails() {
           </p>
 
           <div className="mt-8 flex gap-4">
-            <button
-              onClick={handleAddToCart}
-              className="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700"
-            >
+            <Button onClick={handleAddToCart}>
               Add to Cart
-            </button>
+            </Button>
 
-            <button className="rounded-xl border border-slate-300 px-6 py-3 font-semibold hover:bg-slate-100">
-              Add to Wishlist
-            </button>
+            <Button
+              variant="outline"
+              onClick={handleWishlist}
+            >
+              {isWishlisted
+                ? "♥ Added to Wishlist"
+                : "♡ Add to Wishlist"}
+            </Button>
           </div>
         </div>
       </div>

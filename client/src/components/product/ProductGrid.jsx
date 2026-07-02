@@ -1,11 +1,13 @@
 import ProductCard from "./ProductCard";
+import EmptyState from "../ui/EmptyState";
 
 function ProductGrid({ products }) {
   if (!products.length) {
     return (
-      <div className="rounded-2xl bg-white p-10 text-center shadow">
-        <p className="text-slate-600">No products found.</p>
-      </div>
+      <EmptyState
+        title="No products found"
+        description="Try searching with another keyword or clearing filters."
+      />
     );
   }
 

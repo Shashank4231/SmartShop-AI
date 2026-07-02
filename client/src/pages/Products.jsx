@@ -9,6 +9,8 @@ import {
   clearProductFilters,
 } from "../features/product/productSlice";
 
+import Loader from "../components/ui/Loader";
+
 function Products() {
   const dispatch = useDispatch();
   const { products, pagination, loading, error, filters } = useSelector(
@@ -70,7 +72,7 @@ function Products() {
         </button>
       </div>
 
-      {loading && <p className="text-slate-600">Loading products...</p>}
+     {loading && <Loader text="Loading products..." />}
 
       {error && (
         <p className="rounded-xl bg-red-50 px-4 py-3 text-red-600">{error}</p>

@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import Input from "../components/forms/Input";
+import Button from "../components/ui/Button";
+
 import { clearAuthError, login } from "../features/auth/authSlice";
 import { fetchCart } from "../features/cart/cartSlice";
+import { fetchWishlist } from "../features/wishlist/wishlistSlice";
 
 function Login() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/";
+
   const { loading, error: authError } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -25,6 +35,7 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
     dispatch(clearAuthError());
 
@@ -42,11 +53,18 @@ function Login() {
 
     if (login.fulfilled.match(result)) {
       dispatch(fetchCart());
-      alert("Login successful");
+      dispatch(fetchWishlist());
+
+      toast.success("Login successful!");
+
       setFormData({
         email: "",
         password: "",
       });
+
+      navigate(from, { replace: true });
+    } else {
+      toast.error(result.payload || "Login failed");
     }
   };
 
@@ -62,8 +80,8 @@ function Login() {
         </h2>
 
         <p className="mt-4 text-slate-600">
-          Access your cart, wishlist, orders, personalized recommendations, and
-          secure checkout.
+          Access your cart, wishlist, orders, personalized recommendations,
+          and secure checkout.
         </p>
       </div>
 
@@ -71,7 +89,9 @@ function Login() {
         onSubmit={handleSubmit}
         className="rounded-3xl bg-white p-8 shadow-xl"
       >
-        <h3 className="mb-6 text-2xl font-bold text-slate-900">Login</h3>
+        <h3 className="mb-6 text-2xl font-bold text-slate-900">
+          Login
+        </h3>
 
         {(error || authError) && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -100,17 +120,21 @@ function Login() {
         </div>
 
         <div className="mt-4 flex justify-end">
-          <a href="/forgot-password" className="text-sm font-medium text-blue-600">
+          <a
+            href="/forgot-password"
+            className="text-sm font-medium text-blue-600 hover:underline"
+          >
             Forgot Password?
           </a>
         </div>
 
-        <button
-          disabled={loading}
-          className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+        <Button
+          type="submit"
+          loading={loading}
+          className="mt-6 w-full"
         >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          Login
+        </Button>
       </form>
     </section>
   );

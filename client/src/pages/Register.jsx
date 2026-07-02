@@ -1,11 +1,20 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Input from "../components/forms/Input";
+import Button from "../components/ui/Button";
+
 import { clearAuthError, register } from "../features/auth/authSlice";
 
 function Register() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/login";
+
   const { loading, error: authError } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -26,6 +35,7 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
     dispatch(clearAuthError());
 
@@ -53,7 +63,7 @@ function Register() {
     );
 
     if (register.fulfilled.match(result)) {
-      alert("User registered successfully");
+      toast.success("Account created successfully. Please login.");
 
       setFormData({
         name: "",
@@ -61,6 +71,10 @@ function Register() {
         password: "",
         confirmPassword: "",
       });
+
+      navigate(from, { replace: true });
+    } else {
+      toast.error(result.payload || "Registration failed");
     }
   };
 
@@ -132,12 +146,9 @@ function Register() {
           />
         </div>
 
-        <button
-          disabled={loading}
-          className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-        >
-          {loading ? "Creating Account..." : "Register"}
-        </button>
+        <Button type="submit" loading={loading} className="mt-6 w-full">
+          Register
+        </Button>
       </form>
     </section>
   );
