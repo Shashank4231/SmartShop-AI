@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function CartSummary({ subtotal, shipping, discount, total, onClear, loading }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow">
@@ -29,9 +31,11 @@ function CartSummary({ subtotal, shipping, discount, total, onClear, loading }) 
         </div>
       </div>
 
-      <button className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700">
-        Proceed to Checkout
-      </button>
+      <Link to="/checkout">
+        <button className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700">
+          Proceed to Checkout
+        </button>
+      </Link>
 
       <button
         onClick={onClear}

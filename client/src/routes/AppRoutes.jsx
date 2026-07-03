@@ -12,6 +12,12 @@ import Addresses from "../pages/Addresses";
 import NotFound from "../pages/NotFound";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import Checkout from "../pages/Checkout";
+
+import Orders from "../pages/Orders";
+import OrderDetails from "../pages/OrderDetails";
+
+import OrderSuccess from "../pages/OrderSuccess";
 
 function AppRoutes() {
   return (
@@ -51,6 +57,39 @@ function AppRoutes() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="*" element={<NotFound />} />
+        <Route
+          path="checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="orders/:orderId"
+          element={
+            <ProtectedRoute>
+              <OrderDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="order-success"
+          element={
+            <ProtectedRoute>
+              <OrderSuccess />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );
