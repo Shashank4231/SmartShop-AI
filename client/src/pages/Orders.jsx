@@ -7,6 +7,8 @@ import EmptyState from "../components/ui/EmptyState";
 import Loader from "../components/ui/Loader";
 import StatusBadge from "../components/ui/StatusBadge";
 
+import OrderCardSkeleton from "../components/skeleton/OrderCardSkeleton";
+
 function Orders() {
   const dispatch = useDispatch();
   const { orders = [], loading, error } = useSelector((state) => state.order);
@@ -16,7 +18,20 @@ function Orders() {
   }, [dispatch]);
 
   if (loading) {
-    return <Loader text="Loading orders..." />;
+    return (
+      <section className="mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-8">
+          <div className="h-4 w-32 rounded bg-slate-200" />
+          <div className="mt-3 h-10 w-56 rounded bg-slate-200" />
+        </div>
+
+        <div className="space-y-6">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <OrderCardSkeleton key={index} />
+          ))}
+        </div>
+      </section>
+    );
   }
 
   if (error) {

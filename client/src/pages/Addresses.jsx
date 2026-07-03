@@ -15,6 +15,8 @@ import {
   removeAddress,
 } from "../features/address/addressSlice";
 
+import AddressCardSkeleton from "../components/skeleton/AddressCardSkeleton";
+
 function Addresses() {
   const dispatch = useDispatch();
   const { addresses, loading, error } = useSelector((state) => state.address);
@@ -29,11 +31,11 @@ function Addresses() {
   const handleSubmit = async (formData) => {
     const result = editingAddress
       ? await dispatch(
-          editAddress({
-            addressId: editingAddress._id,
-            addressData: formData,
-          })
-        )
+        editAddress({
+          addressId: editingAddress._id,
+          addressData: formData,
+        })
+      )
       : await dispatch(createAddress(formData));
 
     if (createAddress.fulfilled.match(result) || editAddress.fulfilled.match(result)) {
@@ -71,7 +73,20 @@ function Addresses() {
   };
 
   if (loading && addresses.length === 0) {
-    return <Loader text="Loading addresses..." />;
+    return (
+      <section className="mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-8">
+          <div className="h-4 w-36 rounded bg-slate-200" />
+          <div className="mt-3 h-10 w-64 rounded bg-slate-200" />
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <AddressCardSkeleton key={index} />
+          ))}
+        </div>
+      </section>
+    );
   }
 
   return (

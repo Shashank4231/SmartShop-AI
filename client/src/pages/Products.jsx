@@ -10,6 +10,7 @@ import {
 } from "../features/product/productSlice";
 
 import Loader from "../components/ui/Loader";
+import ProductCardSkeleton from "../components/skeleton/ProductCardSkeleton";
 
 function Products() {
   const dispatch = useDispatch();
@@ -72,7 +73,13 @@ function Products() {
         </button>
       </div>
 
-     {loading && <Loader text="Loading products..." />}
+      {loading && (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))}
+        </div>
+      )}
 
       {error && (
         <p className="rounded-xl bg-red-50 px-4 py-3 text-red-600">{error}</p>
@@ -86,11 +93,10 @@ function Products() {
             <button
               key={index + 1}
               onClick={() => handlePageChange(index + 1)}
-              className={`rounded-lg px-4 py-2 font-semibold ${
-                pagination.currentPage === index + 1
+              className={`rounded-lg px-4 py-2 font-semibold ${pagination.currentPage === index + 1
                   ? "bg-slate-900 text-white"
                   : "bg-white text-slate-700"
-              }`}
+                }`}
             >
               {index + 1}
             </button>

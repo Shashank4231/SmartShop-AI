@@ -7,6 +7,7 @@ function MainLayout() {
   const dispatch = useDispatch();
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
   const { totalItems } = useSelector((state) => state.cart);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
 
   const handleLogout = async () => {
     await dispatch(logoutUserThunk());
@@ -36,18 +37,22 @@ function MainLayout() {
               <>
                 <Link
                   to="/wishlist"
-                  className="text-sm font-medium hover:text-blue-600"
+                  className="relative text-sm font-medium hover:text-blue-600"
                 >
-                  Wishlist
+                  ❤️ Wishlist
+                  {wishlistItems.length > 0 && (
+                    <span className="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
+                      {wishlistItems.length}
+                    </span>
+                  )}
                 </Link>
-
                 <Link
                   to="/cart"
                   className="relative text-sm font-medium hover:text-blue-600"
                 >
-                  Cart
+                  🛒 Cart
                   {totalItems > 0 && (
-                    <span className="absolute -right-4 -top-3 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
+                    <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-600">
                       {totalItems}
                     </span>
                   )}

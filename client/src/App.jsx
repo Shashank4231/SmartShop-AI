@@ -6,6 +6,8 @@ import { loadCurrentUser } from "./features/auth/authSlice";
 import { fetchCart } from "./features/cart/cartSlice";
 import Loader from "./components/ui/Loader";
 
+import { fetchWishlist } from "./features/wishlist/wishlistSlice";
+
 function App() {
   const dispatch = useDispatch();
   const { initialized, loading } = useSelector((state) => state.auth);
@@ -14,6 +16,7 @@ function App() {
     dispatch(loadCurrentUser()).then((result) => {
       if (loadCurrentUser.fulfilled.match(result)) {
         dispatch(fetchCart());
+        dispatch(fetchWishlist());
       }
     });
   }, [dispatch]);
