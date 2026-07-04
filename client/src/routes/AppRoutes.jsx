@@ -19,6 +19,10 @@ import OrderDetails from "../pages/OrderDetails";
 
 import OrderSuccess from "../pages/OrderSuccess";
 
+import AdminLayout from "../layouts/AdminLayout";
+import AdminRoute from "../components/auth/AdminRoute";
+import Dashboard from "../pages/admin/Dashboard";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -90,6 +94,16 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+      </Route>
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
       </Route>
     </Routes>
   );

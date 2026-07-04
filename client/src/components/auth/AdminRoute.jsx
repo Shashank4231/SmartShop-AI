@@ -1,8 +1,15 @@
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import Loader from "../ui/Loader";
 
 function AdminRoute({ children }) {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, initialized, loading, user } = useSelector(
+    (state) => state.auth
+  );
+
+  if (!initialized || loading) {
+    return <Loader text="Checking admin access..." />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
