@@ -7,8 +7,8 @@ import ProductForm from "../../components/admin/ProductForm";
 import Button from "../../components/ui/Button";
 import Drawer from "../../components/ui/Drawer";
 import Loader from "../../components/ui/Loader";
-
 import ConfirmationModal from "../../components/ui/ConfirmationModal";
+
 import {
   createAdminProduct,
   deleteAdminProduct,
@@ -18,8 +18,6 @@ import {
 import { fetchCategories } from "../../features/category/categorySlice";
 
 function AdminProducts() {
-  const [page, setPage] = useState(1);
-  const limit = 10;
   const dispatch = useDispatch();
 
   const { products, pagination, loading, error } = useSelector(
@@ -27,17 +25,45 @@ function AdminProducts() {
   );
   const { categories } = useSelector((state) => state.category);
 
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState("createdAt");
+  const [order, setOrder] = useState("desc");
+  const [category, setCategory] = useState("");
+
   const [openDrawer, setOpenDrawer] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-
   const [productToDelete, setProductToDelete] = useState(null);
 
-  const [search, setSearch] = useState("");
+  const limit = 10;
 
   useEffect(() => {
-    dispatch(fetchProducts({ limit, page, search }));
+    dispatch(
+      fetchProducts({
+        limit,
+        page,
+        search,
+        sort,
+        order,
+        category,
+      })
+    );
+
     dispatch(fetchCategories());
-  }, [dispatch, page, search]);
+  }, [dispatch, page, search, sort, order, category]);
+
+  const refetchProducts = () => {
+    dispatch(
+      fetchProducts({
+        limit,
+        page,
+        search,
+        sort,
+        order,
+        category,
+      })
+    );
+  };
 
   const handleOpenCreate = () => {
     setEditingProduct(null);
@@ -57,11 +83,11 @@ function AdminProducts() {
   const handleSubmitProduct = async (productData) => {
     const result = editingProduct
       ? await dispatch(
-        updateAdminProduct({
-          productId: editingProduct._id,
-          productData,
-        })
-      )
+          updateAdminProduct({
+            productId: editingProduct._id,
+            productData,
+          })
+        )
       : await dispatch(createAdminProduct(productData));
 
     if (
@@ -75,7 +101,7 @@ function AdminProducts() {
       );
 
       handleCloseDrawer();
-      dispatch(fetchProducts({ limit: 100 }));
+      refetchProducts();
     } else {
       toast.error(result.payload || "Product action failed");
     }
@@ -89,6 +115,7 @@ function AdminProducts() {
     if (deleteAdminProduct.fulfilled.match(result)) {
       toast.success("Product deleted successfully");
       setProductToDelete(null);
+      refetchProducts();
     } else {
       toast.error(result.payload || "Failed to delete product");
     }
@@ -179,7 +206,7 @@ function AdminProducts() {
         </p>
       )}
 
-      <div className="mb-6 rounded-2xl bg-white p-4 shadow">
+      <div className="mb-6 grid gap-4 rounded-2xl bg-white p-4 shadow md:grid-cols-4">
         <input
           value={search}
           onChange={(e) => {
@@ -187,8 +214,50 @@ function AdminProducts() {
             setPage(1);
           }}
           placeholder="Search products..."
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
         />
+
+        <select
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+        >
+          <option value="">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat._id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={sort}
+          onChange={(e) => {
+            setSort(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+        >
+          <option value="createdAt">Newest</option>
+          <option value="title">Name</option>
+          <option value="price">Price</option>
+          <option value="stock">Stock</option>
+        </select>
+
+        <select
+          value={order}
+          onChange={(e) => {
+            setOrder(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+        >
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
       </div>
 
       <DataTable
@@ -200,6 +269,7 @@ function AdminProducts() {
         pagination={pagination}
         onPageChange={setPage}
       />
+
       <Drawer
         isOpen={openDrawer}
         title={editingProduct ? "Edit Product" : "Add Product"}
@@ -213,6 +283,7 @@ function AdminProducts() {
           onSubmit={handleSubmitProduct}
         />
       </Drawer>
+
       <ConfirmationModal
         isOpen={!!productToDelete}
         title="Delete Product?"
