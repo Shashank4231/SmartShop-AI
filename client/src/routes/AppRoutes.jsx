@@ -23,6 +23,8 @@ import AdminLayout from "../layouts/AdminLayout";
 import AdminRoute from "../components/auth/AdminRoute";
 import Dashboard from "../pages/admin/Dashboard";
 
+import AdminProducts from "../pages/admin/AdminProducts";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -104,6 +106,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="products" element={<AdminProducts />} />
       </Route>
     </Routes>
   );

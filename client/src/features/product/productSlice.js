@@ -1,5 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getProductBySlug, getProducts } from "../../services/product.service";
+import {
+  createProduct,
+  deleteProduct,
+  getProductBySlug,
+  getProducts,
+  updateProduct,
+} from "../../services/product.service";
 
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
@@ -24,6 +30,48 @@ export const fetchProductBySlug = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to fetch product"
+      );
+    }
+  }
+);
+
+export const createAdminProduct = createAsyncThunk(
+  "products/createAdminProduct",
+  async (productData, thunkAPI) => {
+    try {
+      const response = await createProduct(productData);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to create product"
+      );
+    }
+  }
+);
+
+export const updateAdminProduct = createAsyncThunk(
+  "products/updateAdminProduct",
+  async ({ productId, productData }, thunkAPI) => {
+    try {
+      const response = await updateProduct({ productId, productData });
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to update product"
+      );
+    }
+  }
+);
+
+export const deleteAdminProduct = createAsyncThunk(
+  "products/deleteAdminProduct",
+  async (productId, thunkAPI) => {
+    try {
+      await deleteProduct(productId);
+      return productId;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to delete product"
       );
     }
   }
@@ -57,12 +105,22 @@ const productSlice = createSlice({
         page: action.payload.page || 1,
       };
     },
+
     clearProductFilters: (state) => {
       state.filters = initialState.filters;
+    },
+
+    clearProductError: (state) => {
+      state.error = null;
+    },
+
+    resetSelectedProduct: (state) => {
+      state.selectedProduct = null;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Products
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -76,6 +134,8 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+      // Fetch Single Product
       .addCase(fetchProductBySlug.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -88,9 +148,57 @@ const productSlice = createSlice({
       .addCase(fetchProductBySlug.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // Create Product
+      .addCase(createAdminProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createAdminProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products.unshift(action.payload);
+      })
+      .addCase(createAdminProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateAdminProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateAdminProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = state.products.map((product) =>
+          product._id === action.payload._id ? action.payload : product
+        );
+      })
+      .addCase(updateAdminProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteAdminProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteAdminProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = state.products.filter(
+          (product) => product._id !== action.payload
+        );
+      })
+      .addCase(deleteAdminProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { setProductFilters, clearProductFilters } = productSlice.actions;
+export const {
+  setProductFilters,
+  clearProductFilters,
+  clearProductError,
+  resetSelectedProduct,
+} = productSlice.actions;
+
 export default productSlice.reducer;
