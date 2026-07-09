@@ -1,6 +1,11 @@
 import express from "express";
 
-import { getDashboardStats } from "../controllers/admin.controller.js";
+import {
+  getDashboardStats,
+  getAllOrders,
+  getAdminOrderById,
+  updateOrderStatus,
+} from "../controllers/admin.controller.js";
 import {
   authorizeRoles,
   verifyJWT,
@@ -8,6 +13,10 @@ import {
 
 const router = express.Router();
 
+
+router.get("/orders", getAllOrders);
+router.get("/orders/:orderId", getAdminOrderById);
+router.patch("/orders/:orderId/status", updateOrderStatus);
 router.use(verifyJWT);
 router.use(authorizeRoles("admin"));
 
