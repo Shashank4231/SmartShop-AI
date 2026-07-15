@@ -30,6 +30,8 @@ import AdminCategories from "../pages/admin/AdminCategories";
 import AdminOrders from "../pages/admin/AdminOrders";
 import AdminOrderDetails from "../pages/admin/AdminOrderDetails";
 
+import AdminUsers from "../pages/admin/AdminUsers";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -118,6 +120,7 @@ function AppRoutes() {
           path="orders/:orderId"
           element={<AdminOrderDetails />}
         />
+        <Route path="users" element={<AdminUsers />} />
       </Route>
     </Routes>
   );

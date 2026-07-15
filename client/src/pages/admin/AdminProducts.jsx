@@ -1,9 +1,13 @@
+import { Plus } from "lucide-react";
+import { PackagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
-import DataTable from "../../components/admin/DataTable";
-import ProductForm from "../../components/admin/ProductForm";
+import DataTable from "../../components/admin/shared/DataTable";
+import AdminPageHeader from "../../components/admin/shared/AdminPageHeader";
+import ProductForm from "../../components/admin/products/ProductForm";
+
 import Button from "../../components/ui/Button";
 import Drawer from "../../components/ui/Drawer";
 import Loader from "../../components/ui/Loader";
@@ -83,11 +87,11 @@ function AdminProducts() {
   const handleSubmitProduct = async (productData) => {
     const result = editingProduct
       ? await dispatch(
-          updateAdminProduct({
-            productId: editingProduct._id,
-            productData,
-          })
-        )
+        updateAdminProduct({
+          productId: editingProduct._id,
+          productData,
+        })
+      )
       : await dispatch(createAdminProduct(productData));
 
     if (
@@ -186,19 +190,20 @@ function AdminProducts() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold text-blue-600">
-            Product Management
-          </p>
-
-          <h1 className="mt-2 text-4xl font-bold text-slate-900">
-            Products
-          </h1>
-        </div>
-
-        <Button onClick={handleOpenCreate}>Add Product</Button>
-      </div>
+      <AdminPageHeader
+        breadcrumb={["Admin", "Products"]}
+        icon={<PackagePlus size={32} />}
+        title="Products"
+        description="Manage your catalog, inventory and pricing."
+        action={
+          <Button
+            onClick={handleOpenCreate}
+            leftIcon={<Plus size={18} />}
+          >
+            Add Product
+          </Button>
+        }
+      />
 
       {error && (
         <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-red-600">

@@ -5,6 +5,10 @@ import {
   getAllOrdersService,
   getAdminOrderByIdService,
   updateOrderStatusService,
+  getAllUsersService,
+  getAdminUserByIdService,
+  toggleUserBlockService,
+  updateUserRoleService,
 } from "../services/admin.service.js";
 
 export const getDashboardStats = asyncHandler(async (req, res) => {
@@ -43,4 +47,55 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(new ApiResponse(200, order, "Order status updated successfully"));
+});
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await getAllUsersService({
+    search: req.query.search,
+    role: req.query.role,
+    status: req.query.status,
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, users, "Users fetched successfully"));
+});
+
+export const getAdminUserById = asyncHandler(async (req, res) => {
+  const data = await getAdminUserByIdService(req.params.userId);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, data, "User fetched successfully"));
+});
+
+export const updateUserRole = asyncHandler(async (req, res) => {
+  const user = await updateUserRoleService({
+    adminId: req.user._id,
+    userId: req.params.userId,
+    role: req.body.role,
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, user, "User role updated successfully"));
+});
+
+export const toggleUserBlock = asyncHandler(async (req, res) => {
+  const user = await toggleUserBlockService({
+    adminId: req.user._id,
+    userId: req.params.userId,
+  });
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user,
+        user.isBlocked
+          ? "User blocked successfully"
+          : "User unblocked successfully"
+      )
+    );
 });

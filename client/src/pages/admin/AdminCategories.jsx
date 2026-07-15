@@ -1,12 +1,17 @@
+import { Plus } from "lucide-react";
+import { Shapes } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
-import CategoryForm from "../../components/admin/CategoryForm";
-import DataTable from "../../components/admin/DataTable";
+import CategoryForm from "../../components/admin/categories/CategoryForm";
+import DataTable from "../../components/admin/shared/DataTable";
+import AdminPageHeader from "../../components/admin/shared/AdminPageHeader";
+
 import Button from "../../components/ui/Button";
 import ConfirmationModal from "../../components/ui/ConfirmationModal";
 import Drawer from "../../components/ui/Drawer";
+
 
 import {
   createAdminCategory,
@@ -53,11 +58,11 @@ function AdminCategories() {
   const handleSubmitCategory = async (categoryData) => {
     const result = editingCategory
       ? await dispatch(
-          updateAdminCategory({
-            categoryId: editingCategory._id,
-            categoryData,
-          })
-        )
+        updateAdminCategory({
+          categoryId: editingCategory._id,
+          categoryData,
+        })
+      )
       : await dispatch(createAdminCategory(categoryData));
 
     if (
@@ -131,19 +136,20 @@ function AdminCategories() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold text-blue-600">
-            Category Management
-          </p>
-
-          <h1 className="mt-2 text-4xl font-bold text-slate-900">
-            Categories
-          </h1>
-        </div>
-
-        <Button onClick={handleOpenCreate}>Add Category</Button>
-      </div>
+      <AdminPageHeader
+        breadcrumb={["Admin", "Categories"]}
+        icon={<Shapes size={32} />}
+        title="Categories"
+        description="Organize products into clear and manageable categories."
+        action={
+          <Button
+            onClick={handleOpenCreate}
+            leftIcon={<Plus size={18} />}
+          >
+            Add Category
+          </Button>
+        }
+      />
 
       {error && (
         <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-red-600">

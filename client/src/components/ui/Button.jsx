@@ -9,22 +9,24 @@ function Button({
   className = "",
   type = "button",
   onClick,
+  leftIcon,
+  rightIcon,
 }) {
   const variants = {
     primary:
-      "bg-slate-900 text-white hover:bg-slate-700",
+      "bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-900",
 
     secondary:
-      "bg-blue-600 text-white hover:bg-blue-700",
+      "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-600",
 
     outline:
-      "border border-slate-300 bg-white text-slate-900 hover:bg-slate-100",
+      "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50 focus:ring-slate-400",
 
     danger:
-      "bg-red-600 text-white hover:bg-red-700",
+      "bg-red-600 text-white hover:bg-red-700 focus:ring-red-600",
 
     success:
-      "bg-green-600 text-white hover:bg-green-700",
+      "bg-green-600 text-white hover:bg-green-700 focus:ring-green-600",
   };
 
   const sizes = {
@@ -39,20 +41,28 @@ function Button({
       disabled={loading || disabled}
       onClick={onClick}
       className={clsx(
-        "rounded-xl font-semibold transition-all duration-200",
-        "disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-semibold",
+        "transition-all duration-200",
+        "hover:-translate-y-0.5 hover:shadow-lg",
+        "active:translate-y-0 active:scale-[0.98]",
+        "focus:outline-none focus:ring-2 focus:ring-offset-2",
+        "disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none",
         variants[variant],
         sizes[size],
         className
       )}
     >
       {loading ? (
-        <div className="flex items-center justify-center gap-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+        <>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
           Loading...
-        </div>
+        </>
       ) : (
-        children
+        <>
+          {leftIcon}
+          {children}
+          {rightIcon}
+        </>
       )}
     </button>
   );

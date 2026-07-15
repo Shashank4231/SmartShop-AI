@@ -1,12 +1,17 @@
+import { PackageCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-import DataTable from "../../components/admin/DataTable";
+import DataTable from "../../components/admin/shared/DataTable";
+import AdminPageHeader from "../../components/admin/shared/AdminPageHeader";
+
 import StatusBadge from "../../components/ui/StatusBadge";
 import Button from "../../components/ui/Button";
 
+
 import { fetchAdminOrders } from "../../features/adminOrder/adminOrderSlice";
+
 
 function AdminOrders() {
   const dispatch = useDispatch();
@@ -66,15 +71,12 @@ function AdminOrders() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p className="text-sm font-semibold text-blue-600">
-          Order Management
-        </p>
-
-        <h1 className="mt-2 text-4xl font-bold text-slate-900">
-          Orders
-        </h1>
-      </div>
+      <AdminPageHeader
+        breadcrumb={["Admin", "Orders"]}
+        icon={<PackageCheck size={32} />}
+        title="Orders"
+        description="Track, filter, and manage customer orders."
+      />
 
       {error && (
         <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-red-600">

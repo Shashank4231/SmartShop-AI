@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-
-import Input from "../forms/Input";
-import Button from "../ui/Button";
+import Input from "../../forms/Input";
+import Button from "../../ui/Button";
 
 const initialState = {
   name: "",

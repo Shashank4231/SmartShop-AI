@@ -116,3 +116,126 @@ export const updateOrderStatusService = async (orderId, status) => {
 
   return await Order.findById(orderId).populate("user", "name email");
 };
+
+export const getAllUsersService = async ({ search, role, status }) => {
+  const query = {};
+
+  if (role) {
+    query.role = role;
+  }
+
+  if (status === "blocked") {
+    query.isBlocked = true;
+  }
+
+  if (status === "active") {
+    query.isBlocked = false;
+  }
+
+  if (search) {
+    query.$or = [
+      {
+        name: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        email: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
+  }
+
+  return await User.find(query)
+    .select("-password -refreshToken")
+    .sort({ createdAt: -1 });
+};
+
+export const getAdminUserByIdService = async (userId) => {
+  const user = await User.findById(userId)
+    .select("-password -refreshToken")
+    .populate("wishlist", "title slug price discountPrice images");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const orders = await Order.find({ user: userId })
+    .sort({ createdAt: -1 })
+    .limit(10);
+
+  const totalSpendingResult = await Order.aggregate([
+    {
+      $match: {
+        user: user._id,
+        orderStatus: {
+          $ne: "Cancelled",
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalSpending: {
+          $sum: "$total",
+        },
+      },
+    },
+  ]);
+
+  return {
+    user,
+    recentOrders: orders,
+    totalSpending: totalSpendingResult[0]?.totalSpending || 0,
+  };
+};
+
+export const updateUserRoleService = async ({
+  adminId,
+  userId,
+  role,
+}) => {
+  const allowedRoles = ["user", "admin", "seller"];
+
+  if (!allowedRoles.includes(role)) {
+    throw new ApiError(400, "Invalid user role");
+  }
+
+  if (adminId.toString() === userId.toString()) {
+    throw new ApiError(400, "You cannot change your own role");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.role = role;
+  await user.save();
+
+  return await User.findById(userId).select("-password -refreshToken");
+};
+
+export const toggleUserBlockService = async ({
+  adminId,
+  userId,
+}) => {
+  if (adminId.toString() === userId.toString()) {
+    throw new ApiError(400, "You cannot block your own account");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.isBlocked = !user.isBlocked;
+  await user.save();
+
+  return await User.findById(userId).select("-password -refreshToken");
+};

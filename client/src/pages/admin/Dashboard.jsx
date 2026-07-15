@@ -1,3 +1,11 @@
+import {
+  IndianRupee,
+  Package,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
+import StatCard from "../../components/admin/shared/StatCard";
+import { LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -5,6 +13,7 @@ import DashboardCard from "../../components/admin/DashboardCard";
 import Loader from "../../components/ui/Loader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { fetchDashboardStats } from "../../features/admin/adminSlice";
+import AdminPageHeader from "../../components/admin/shared/AdminPageHeader";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -28,37 +37,43 @@ function Dashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p className="text-sm font-semibold text-blue-600">Admin Overview</p>
-
-        <h1 className="mt-2 text-4xl font-bold text-slate-900">
-          Dashboard
-        </h1>
-      </div>
-
+      <AdminPageHeader
+        breadcrumb={["Admin"]}
+        icon={<LayoutDashboard size={32} />}
+        title="Dashboard"
+        description="Monitor your store performance and business metrics."
+      />
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardCard
+        <StatCard
           title="Total Revenue"
           value={`₹${stats?.totalRevenue || 0}`}
-          icon="💰"
+          subtitle="Revenue from active orders"
+          icon={<IndianRupee size={28} />}
+          color="bg-emerald-600"
         />
 
-        <DashboardCard
+        <StatCard
           title="Total Orders"
           value={stats?.totalOrders || 0}
-          icon="🛒"
+          subtitle="Orders placed by customers"
+          icon={<ShoppingBag size={28} />}
+          color="bg-blue-600"
         />
 
-        <DashboardCard
+        <StatCard
           title="Total Products"
           value={stats?.totalProducts || 0}
-          icon="📦"
+          subtitle="Active products in the catalog"
+          icon={<Package size={28} />}
+          color="bg-violet-600"
         />
 
-        <DashboardCard
+        <StatCard
           title="Total Users"
           value={stats?.totalUsers || 0}
-          icon="👥"
+          subtitle="Registered SmartShop users"
+          icon={<Users size={28} />}
+          color="bg-orange-600"
         />
       </div>
 
