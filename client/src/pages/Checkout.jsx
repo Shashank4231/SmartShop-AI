@@ -13,9 +13,23 @@ import { fetchAddresses } from "../features/address/addressSlice";
 import { fetchCart } from "../features/cart/cartSlice";
 import { placeOrder } from "../features/order/orderSlice";
 
+import { loadRazorpayScript } from "../utils/loadRazorpay";
+
+import {
+  createPaymentOrder,
+  verifyPayment,
+} from "../features/payment/paymentSlice";
+
 function Checkout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { user } = useSelector((state) => state.auth);
+
+  const {
+    loading: paymentLoading,
+    verifying: paymentVerifying,
+  } = useSelector((state) => state.payment);
 
   const { addresses, loading: addressLoading } = useSelector(
     (state) => state.address
@@ -50,6 +64,113 @@ function Checkout() {
     }
   }, [addresses]);
 
+  const selectedOrderAddress = addresses.find(
+    (address) => address._id === selectedAddress
+  );
+
+  const openRazorpayCheckout = async (mongoOrder) => {
+    const scriptLoaded = await loadRazorpayScript();
+
+    if (!scriptLoaded) {
+      toast.error("Unable to load Razorpay. Please check your internet connection.");
+      return;
+    }
+
+    const paymentOrderResult = await dispatch(
+      createPaymentOrder(mongoOrder._id)
+    );
+
+    console.log("Payment Order Result:", paymentOrderResult);
+
+const paymentOrder = paymentOrderResult.payload;
+
+console.log("Payment Order:", paymentOrder);
+console.log("Razorpay Key:", paymentOrder.keyId);
+
+    if (!createPaymentOrder.fulfilled.match(paymentOrderResult)) {
+      toast.error(
+        paymentOrderResult.payload || "Failed to initialise Razorpay payment"
+      );
+      return;
+    }
+
+
+    const options = {
+      key: paymentOrder.keyId,
+      amount: paymentOrder.amount,
+      currency: paymentOrder.currency,
+      name: "SmartShop AI",
+      description: `Payment for order #${mongoOrder._id
+        .slice(-8)
+        .toUpperCase()}`,
+      order_id: paymentOrder.razorpayOrderId,
+
+      handler: async (response) => {
+        const verificationResult = await dispatch(
+          verifyPayment({
+            orderId: mongoOrder._id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          })
+        );
+
+        if (verifyPayment.fulfilled.match(verificationResult)) {
+          await dispatch(fetchCart());
+
+          toast.success("Payment completed successfully");
+
+          navigate("/order-success", {
+            state: {
+              order: verificationResult.payload,
+            },
+          });
+        } else {
+          toast.error(
+            verificationResult.payload || "Payment verification failed"
+          );
+        }
+      },
+
+      prefill: {
+        name:
+          selectedOrderAddress?.fullName ||
+          user?.name ||
+          "",
+        email: user?.email || "",
+        contact: selectedOrderAddress?.phone || "",
+      },
+
+      notes: {
+        mongoOrderId: mongoOrder._id,
+      },
+
+      theme: {
+        color: "#0f172a",
+      },
+
+      modal: {
+        ondismiss: () => {
+          toast.error(
+            "Payment was cancelled. Your unpaid order is available in My Orders."
+          );
+
+          navigate(`/orders/${mongoOrder._id}`);
+        },
+      },
+    };
+
+    const razorpay = new window.Razorpay(options);
+
+    razorpay.on("payment.failed", (response) => {
+      toast.error(
+        response.error?.description || "Payment failed. Please try again."
+      );
+    });
+
+    razorpay.open();
+  };
+
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       toast.error("Please select a shipping address");
@@ -68,18 +189,27 @@ function Checkout() {
       })
     );
 
-    if (placeOrder.fulfilled.match(result)) {
-      await dispatch(fetchCart());
-      toast.success("Order placed successfully");
-
-      navigate("/order-success", {
-        state: {
-          order: result.payload,
-        },
-      });
-    } else {
+    if (!placeOrder.fulfilled.match(result)) {
       toast.error(result.payload || "Failed to place order");
+      return;
     }
+
+    const createdOrder = result.payload;
+
+    if (paymentMethod === "RAZORPAY") {
+      await openRazorpayCheckout(createdOrder);
+      return;
+    }
+
+    await dispatch(fetchCart());
+
+    toast.success("Order placed successfully");
+
+    navigate("/order-success", {
+      state: {
+        order: createdOrder,
+      },
+    });
   };
 
   if (addressLoading || cartLoading) {
@@ -146,7 +276,11 @@ function Checkout() {
           shipping={shipping}
           discount={discount}
           total={total}
-          loading={orderLoading}
+          loading={
+            orderLoading ||
+            paymentLoading ||
+            paymentVerifying
+          }
           onPlaceOrder={handlePlaceOrder}
         />
       </div>

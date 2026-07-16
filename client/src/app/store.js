@@ -9,6 +9,7 @@ import adminReducer from "../features/admin/adminSlice";
 import categoryReducer from "../features/category/categorySlice";
 import adminOrderReducer from "../features/adminOrder/adminOrderSlice";
 import adminUserReducer from "../features/adminUser/adminUserSlice";
+import paymentReducer from "../features/payment/paymentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,6 @@ export const store = configureStore({
     category: categoryReducer,
     adminOrder: adminOrderReducer,
     adminUser: adminUserReducer,
+    payment: paymentReducer,
   },
 });
