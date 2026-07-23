@@ -25,6 +25,10 @@ export const createRazorpayOrderService = async ({
     throw new ApiError(400, "Order is already paid");
   }
 
+  if (order.orderStatus === "Cancelled") {
+    throw new ApiError(400, "Cancelled orders cannot be paid");
+  }
+
   const razorpayOrder = await razorpay.orders.create({
     amount: Math.round(order.total * 100),
     currency: "INR",
